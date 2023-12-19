@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 
+#[derive(Copy, Clone)]
 pub enum Exploration {
     Explored,
     Unexplored
@@ -25,13 +26,14 @@ impl Maze<'_> {
             left, 
             right, 
             status } => {
-                match *status.borrow() {
+                let s = *status.borrow();
+                match s {
                     Exploration::Explored => vec![label.clone()],
                     Exploration::Unexplored =>   {
                         status.replace(Exploration::Explored);
                         let l = &mut left.explore();
                         let r = &right.explore();
-                        l.extend(*r);
+                        l.extend(r.clone());
                         (&l).to_vec()
                     }
                 }
@@ -53,6 +55,6 @@ fn main() {
     let branch6 = Maze::Branch{label:String::from("6"), left:&branch3, right: &branch7, status: RefCell::new(Exploration::Unexplored)};
     let branch0 = Maze::Branch{label:String::from("0"), left:&branch1, right:&branch6, status: RefCell::new(Exploration::Unexplored)};
     //println!(branch0);
-    //println!(branch0.explore());
+    println!("{:?}", branch0.explore());
     //let trace = ListBuffer[String]();
 }

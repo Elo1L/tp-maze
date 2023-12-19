@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+#[derive(Copy, Clone)]
 pub enum Exploration {
     Explored,
     Unexplored
@@ -26,7 +27,8 @@ impl Maze {
             left, 
             right, 
             status } => {
-                match *status.borrow() {
+                let s = *status.borrow();
+                match s {
                     Exploration::Explored => {},
                     Exploration::Unexplored =>   {
                         status.replace(Exploration::Explored);
@@ -43,15 +45,15 @@ impl Maze {
 
 
 fn main() {
-    let leaf2 = Maze::Leaf{label: String::from("2")};
-    let leaf4 = Maze::Leaf{label:String::from("4")};
-    let leaf5 = Maze::Leaf{label:String::from("5")};
-    let leaf8 = Maze::Leaf{label:String::from("8")};
-    let branch3 = Maze::Branch{label:String::from("3"), left:Rc::new(leaf4), right: Rc::new(leaf5), status: RefCell::new(Exploration::Unexplored)};
-    let branch1 = Maze::Branch{label:String::from("1"), left:Rc::new(leaf2), right: Rc::new(branch3), status: RefCell::new(Exploration::Unexplored)};
-    let branch7 = Maze::Branch{label:String::from("7"), left:Rc::new(leaf5), right: Rc::new(leaf8), status: RefCell::new(Exploration::Unexplored)};
-    let branch6 = Maze::Branch{label:String::from("6"), left:Rc::new(branch3), right: Rc::new(branch7), status: RefCell::new(Exploration::Unexplored)};
-    let branch0 = Maze::Branch{label:String::from("0"), left:Rc::new(branch1), right:Rc::new(branch6), status: RefCell::new(Exploration::Unexplored)};
+    let leaf2 = Rc::new(Maze::Leaf{label: String::from("2")});
+    let leaf4 = Rc::new(Maze::Leaf{label:String::from("4")});
+    let leaf5 = Rc::new(Maze::Leaf{label:String::from("5")});
+    let leaf8 = Rc::new(Maze::Leaf{label:String::from("8")});
+    let branch3 = Rc::new(Maze::Branch{label:String::from("3"), left:leaf4, right: leaf5.clone(), status: RefCell::new(Exploration::Unexplored)});
+    let branch1 = Rc::new(Maze::Branch{label:String::from("1"), left:leaf2, right:branch3.clone(), status: RefCell::new(Exploration::Unexplored)});
+    let branch7 = Rc::new(Maze::Branch{label:String::from("7"), left:leaf5.clone(), right:leaf8, status: RefCell::new(Exploration::Unexplored)});
+    let branch6 = Rc::new(Maze::Branch{label:String::from("6"), left:branch3.clone(), right:branch7, status: RefCell::new(Exploration::Unexplored)});
+    let branch0 = Maze::Branch{label:String::from("0"), left:branch1, right:branch6, status: RefCell::new(Exploration::Unexplored)};
     let mut work = vec![Rc::new(branch0)];
     let mut trace = vec![];
     while work.len() != 0 {
@@ -59,7 +61,4 @@ fn main() {
         node.explore(&mut work, &mut trace);
         println!("trace so far: {:?}", trace);
     }
-    //println!(branch0);
-    //println!(branch0.explore());
-    //let trace = ListBuffer[String]();
 }
